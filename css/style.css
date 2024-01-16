@@ -1,0 +1,16 @@
+.music-list{/*全体*/
+    display: flex;
+    flex-wrap: wrap;
+}
+.song{
+    text-align: center;
+    line-height: 1.2;
+    margin-right: 20px;
+    margin-left: 20px;
+    width: 13em;
+}
+.img{/*写真*/
+    height: 13em;
+    display: inline-block;
+
+}
