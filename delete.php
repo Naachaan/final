@@ -21,15 +21,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     <title>削除</title>
 </head>
 <body>
-    <br><hr><br>
+    <h1><a href="musiclist.php">Playlist</a></h1>
+    <hr>
     <div class="music-list">
     <?php
     // 削除後の楽曲リスト表示
     foreach ($pdo->query('SELECT * FROM music') as $row) {
         echo '<div class="song">';
-        echo '<img class="img" alt="image" src="image/', $row['id'], '.png">';
-        echo '<p>',$row['title'],'</p>';
-        echo '<p>',$row['artist'],'</p>';
+            echo '<img class="img" alt="image" src="image/', htmlspecialchars($row['id']), '.png">';
+            echo '<p class="ctgr">',$row['category'],'</p>';
+            echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
         echo '</div>';
     }
     ?> 
