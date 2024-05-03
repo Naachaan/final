@@ -71,10 +71,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         require 'edit.php';
         ?>
     </div>
-    <form action="musiclist.php" method="post" enctype="multipart/form-data">
+    <form action="musiclist.php" method="post">
         <div class="insert">
-        <input type="file" name="image">
-        <label for="name">title:</label>
+        <label>Album image:</label>
+		<input type="file" name="attachment_file">
+        <label for="name">Title:</label>
         <input type="text" name="title" placeholder="Enter the title of the song" required>
         <label for="artist">   Artist:</label>
         <input type="text" name="artist" placeholder="Enter the artist name" required>
