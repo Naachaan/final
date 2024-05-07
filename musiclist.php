@@ -2,7 +2,7 @@
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
 define( "FILE_DIR", "images/test/");
-
+$clean = array();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if(isset($_POST['dasis']) && $_POST['dasis'] == 'edit'){
         // データの更新処理
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo 'add artist name';
         }else if(empty($_POST['category'])){
             echo 'add ganre';
-        } else if ($sql->execute([htmlspecialchars($_POST['title']),$_POST['artist'],$_POST['category']])) {
+        } else if ($sql->execute([htmlspecialchars($_POST['title']),$_POST['artist'],$_POST['category'],$_POST['image']])) {
             // 更新が成功した場合のみメッセージを表示
             echo 'Added song';
             unset($_POST['dasis']);
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img src="' . FILE_DIR . $clean['attachment_file'] . '">';
+            echo '<img src="' . FILE_DIR . $clean['image'] . '">';
             echo '<p class="ctgr">',$row['category'],'</p>';
             echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
             echo '<div class="botton">';
@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form action="musiclist.php" method="post">
         <div class="insert">
         <label>Album image:</label>
-		<input type="file" name="attachment_file">
+		<input type="file" name="image">
         <label for="name">Title:</label>
         <input type="text" name="title" placeholder="Enter the title of the song" required>
         <label for="artist">   Artist:</label>
@@ -91,16 +91,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $category = htmlspecialchars($categoryrow['category']);
                 echo '<option value="' , $category , '">' , $category , '</option>';
             }
-            $clean = array();
-            if (!empty($_FILES['attachment_file']['tmp_name'])) {
-                $upload_res = move_uploaded_file($_FILES['attachment_file']['tmp_name'], FILE_DIR . $_FILES['attachment_file']['name']);
+            
+            if (!empty($_FILES['image']['tmp_name'])) {
+                $upload_res = move_uploaded_file($_FILES['image']['tmp_name'], FILE_DIR . $_FILES['image']['name']);
                 if ($upload_res !== true) {
-                    $clean['attachment_file'] = 'image/noimage.png';
+                    $clean['image'] = 'image/noimage.png';
                 } else {
-                    $clean['attachment_file'] = $_FILES['attachment_file']['name'];
+                    $clean['image'] = $_FILES['image']['name'];
                 }
             } else {
-                $clean['attachment_file'] = 'image/noimage.png'; // 画像がアップロードされなかった場合のデフォルト画像
+                $clean['image'] = 'image/noimage.png'; // 画像がアップロードされなかった場合のデフォルト画像
             }
             
             ?>
