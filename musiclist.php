@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img src="'echo FILE_DIR.$clean['attachment_file']; '">';
+            echo '<img src="',echo FILE_DIR.$clean['attachment_file']; ,'">';
             echo '<p class="ctgr">',$row['category'],'</p>';
             echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
             echo '<div class="botton">';
