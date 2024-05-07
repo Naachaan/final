@@ -1,6 +1,7 @@
 <?php require 'db-connect.php';
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
+define( "FILE_DIR", "images/test/");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if(isset($_POST['dasis']) && $_POST['dasis'] == 'edit'){
@@ -21,7 +22,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo 'Update failed';
         }
     }else if(isset($_POST['dasis']) && $_POST['dasis'] == 'insert'){
-        $sql=$pdo->prepare('insert into music(title,artist,category) values(?,?,?)');
+        $sql=$pdo->prepare('insert into music(title,artist,category,image) values(?,?,?,?)');
+        if(empty($_POST['image'])){
+            $_POST['image'] = 'noimage';
+        }
         if(empty($_POST['title'])){
             echo 'add song title';
         }else if(empty($_POST['artist'])){
@@ -57,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img class="img" alt="image" src="image/', htmlspecialchars($row['id']), '.png">';
+            echo '<img src="'echo FILE_DIR.$clean['attachment_file']; '">';
             echo '<p class="ctgr">',$row['category'],'</p>';
             echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
             echo '<div class="botton">';
@@ -86,6 +90,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
                 $category = htmlspecialchars($categoryrow['category']);
                 echo '<option value="' , $category , '">' , $category , '</option>';
+            }
+            if( !empty($_FILES['attachment_file']['tmp_name']) ) {
+                $upload_res = move_uploaded_file( $_FILES['attachment_file']['tmp_name'], FILE_DIR.$_FILES['attachment_file']['name']);
+                if( $upload_res !== true ) {
+                    $clean['attachment_file'] = 'image/noimage.png';
+                } else {
+                    $clean['attachment_file'] = $_FILES['attachment_file']['name'];
+                }
             }
             ?>
         </datalist>
