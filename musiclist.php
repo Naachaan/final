@@ -1,7 +1,7 @@
 <?php require 'db-connect.php';
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
-define( "FILE_DIR", "images/test/");
+define( "FILE_DIR", "../image/");
 $clean = array();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if(isset($_POST['dasis']) && $_POST['dasis'] == 'edit'){
@@ -23,14 +23,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }else if(isset($_POST['dasis']) && $_POST['dasis'] == 'insert'){
         $sql=$pdo->prepare('insert into music(title,artist,category,image) values(?,?,?,?)');
-        if (empty($_FILES['file']['name'])) {
-            $fileName='noimages.png';
-        } else {
+        if (!empty($_FILES['image']['name'])) {
             // 画像のアップロード処理
             $targetDir = "../image/";
-            $fileName = basename($_FILES["file"]["name"]);
+            $fileName = basename($_FILES["image"]["name"]);
             $targetFilePath = $targetDir . $fileName;
             $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            
+            // ファイルを移動
+            move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath);
+        } else {
+            $fileName = 'noimages.png';
         }
         if(empty($_POST['title'])){
             echo 'add song title';
@@ -97,27 +100,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $category = htmlspecialchars($categoryrow['category']);
                 echo '<option value="' , $category , '">' , $category , '</option>';
             }
-            if (empty($_FILES['file']['name'])) {
-                    echo '画像ファイルを選択してください。';
-                } else {
-                    // 画像のアップロード処理
-                    $targetDir = "../image/";
-                    $fileName = basename($_FILES["file"]["name"]);
-                    $targetFilePath = $targetDir . $fileName;
-                    $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
-
-                    if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath)) {
-                        // データベースに画像情報を保存
-                        $productSql = $pdo->prepare('INSERT INTO game (game_id, game_name, image_pass) VALUES (?, ?, ?)');
-                        if ($productSql->execute([$_POST['id'], $_POST['name'], $fileName])) {
-                            echo 'ゲームの追加に成功しました。';
-                        } else {
-                            echo 'データベースへの登録に失敗しました。';
-                        }
-                    } else {
-                        echo 'ファイルのアップロードに失敗しました。';
-                    }
-                }
             ?>
         </datalist>
         </div>
