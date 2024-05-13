@@ -1,8 +1,6 @@
 <?php require 'db-connect.php';
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
-define( "FILE_DIR", "../image/");
-$clean = array();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if(isset($_POST['dasis']) && $_POST['dasis'] == 'edit'){
         // データの更新処理
@@ -30,8 +28,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $targetFilePath = $targetDir . $fileName;
             $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
             
-            // ファイルを移動
-            move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath);
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
+                // データベースにファイル名を保存
+                $fileName = htmlspecialchars($fileName); // XSS対策
+            } else {
+                echo 'Failed to upload image';
+            }
         } else {
             $fileName = 'noimages.png';
         }
