@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     // 削除後の楽曲リスト表示
     foreach ($pdo->query('SELECT * FROM music') as $row) {
         echo '<div class="song">';
-            echo '<img class="img" alt="image" src="image/', htmlspecialchars($row['id']), '.png">';
+        echo '<img src="image/',$row['image'],'">';
             echo '<p class="ctgr">',$row['category'],'</p>';
             echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
         echo '</div>';

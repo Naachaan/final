@@ -23,8 +23,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }else if(isset($_POST['dasis']) && $_POST['dasis'] == 'insert'){
         $sql=$pdo->prepare('insert into music(title,artist,category,image) values(?,?,?,?)');
-        if(empty($_POST['image'])){
-            $_POST['image'] = 'noimage';
+        if (empty($_FILES['file']['name'])) {
+            $fileName='noimages.png';
+        } else {
+            // 画像のアップロード処理
+            $targetDir = "../image/";
+            $fileName = basename($_FILES["file"]["name"]);
+            $targetFilePath = $targetDir . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
         }
         if(empty($_POST['title'])){
             echo 'add song title';
@@ -32,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo 'add artist name';
         }else if(empty($_POST['category'])){
             echo 'add ganre';
-        } else if ($sql->execute([htmlspecialchars($_POST['title']),$_POST['artist'],$_POST['category'],$_POST['image']])) {
+        } else if ($sql->execute([htmlspecialchars($_POST['title']),$_POST['artist'],$_POST['category'],$fileName])) {
             // 更新が成功した場合のみメッセージを表示
             echo 'Added song';
             unset($_POST['dasis']);
@@ -61,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img src="' . FILE_DIR . $clean['image'] . '">';
+            echo '<img src="image/',$row['image'],'">';
             echo '<p class="ctgr">',$row['category'],'</p>';
             echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
             echo '<div class="botton">';
@@ -91,18 +97,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $category = htmlspecialchars($categoryrow['category']);
                 echo '<option value="' , $category , '">' , $category , '</option>';
             }
-            
-            if (!empty($_FILES['image']['tmp_name'])) {
-                $upload_res = move_uploaded_file($_FILES['image']['tmp_name'], FILE_DIR . $_FILES['image']['name']);
-                if ($upload_res !== true) {
-                    $clean['image'] = 'image/noimage.png';
+            if (empty($_FILES['file']['name'])) {
+                    echo '画像ファイルを選択してください。';
                 } else {
-                    $clean['image'] = $_FILES['image']['name'];
+                    // 画像のアップロード処理
+                    $targetDir = "../image/";
+                    $fileName = basename($_FILES["file"]["name"]);
+                    $targetFilePath = $targetDir . $fileName;
+                    $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+
+                    if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath)) {
+                        // データベースに画像情報を保存
+                        $productSql = $pdo->prepare('INSERT INTO game (game_id, game_name, image_pass) VALUES (?, ?, ?)');
+                        if ($productSql->execute([$_POST['id'], $_POST['name'], $fileName])) {
+                            echo 'ゲームの追加に成功しました。';
+                        } else {
+                            echo 'データベースへの登録に失敗しました。';
+                        }
+                    } else {
+                        echo 'ファイルのアップロードに失敗しました。';
+                    }
                 }
-            } else {
-                $clean['image'] = 'image/noimage.png'; // 画像がアップロードされなかった場合のデフォルト画像
-            }
-            
             ?>
         </datalist>
         </div>
