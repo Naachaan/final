@@ -1,6 +1,12 @@
-<?php require 'db-connect.php';
+<?php
+require 'db-connect.php';
+
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['dasis']) && $_POST['dasis'] == 'edit') {
@@ -24,10 +30,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = $pdo->prepare('INSERT INTO music (title, artist, category, image) VALUES (?, ?, ?, ?)');
         if (is_uploaded_file($_FILES['file']['tmp_name'])) {
             if (!file_exists('image')) {
-                mkdir('image');
+                if (!mkdir('image')) {
+                    die('Failed to create directory.');
+                }
             }
             $file = './image/' . basename($_FILES['file']['name']);
-            move_uploaded_file($_FILES['file']['tmp_name'], $file);
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $file)) {
+                echo 'File uploaded successfully.';
+            } else {
+                die('Failed to move uploaded file.');
+            }
         } else {
             $file = 'image/noimages.png';
         }
@@ -55,8 +67,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="css/style.css" />
     <meta charset="UTF-8">
     <title>Playlist</title>
+    <style>
+        .insert {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .insert-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+
     <h1>Playlist</h1>
     <hr>
     <div class="music-list">
@@ -69,9 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
             echo '<div class="botton">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
-            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' 
-            . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' 
-            . htmlspecialchars($row['category']) . '\')">更新</button>';
+            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' . htmlspecialchars($row['category']) . '\')">更新</button>';
             echo '<form action="delete.php" method="post">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
             echo '<button type="submit">削除</button>';
@@ -80,31 +127,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         require 'edit.php';
         ?>
     </div>
-    <div class="insert">
-        <form action="musiclist.php" method="post" enctype="multipart/form-data">
-            <label>Album image:</label>
-    		<input type="file" name="file"><br>
-            <label for="name">Title:</label>
-            <input type="text" name="title" placeholder="Enter the title of the song" required><br>
-            <label for="artist">Artist:</label>
-            <input type="text" name="artist" placeholder="Enter the artist name" required><br>
-            <label for="category">Genre:</label>
-            <input type="text" name="category" list="genre" placeholder="Text input or selection" autocomplete="on" required><br>
-            <datalist id="genre">
-                <?php
-                foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
-                    $category = htmlspecialchars($categoryrow['category']);
-                    echo '<option value="' , $category , '">' , $category , '</option>';
-                }
-                ?>
-            </datalist>
-            <input type="hidden" name="dasis" value="insert">
-            <button type="submit">追加</button>
-        </form>
+
+    <button onclick="openInsertModal()">楽曲を追加</button>
+
+    <div id="insertModal" class="insert">
+        <div class="insert-content">
+            <span class="close" onclick="closeInsertModal()">&times;</span>
+            <form action="musiclist.php" method="post" enctype="multipart/form-data">
+                <label>Album image:</label>
+                <input type="file" name="file"><br>
+                <label for="name">Title:</label>
+                <input type="text" name="title" placeholder="Enter the title of the song" required><br>
+                <label for="artist">Artist:</label>
+                <input type="text" name="artist" placeholder="Enter the artist name" required><br>
+                <label for="category">Genre:</label>
+                <input type="text" name="category" list="genre" placeholder="Text input or selection" autocomplete="on" required><br>
+                <datalist id="genre">
+                    <?php
+                    foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
+                        $category = htmlspecialchars($categoryrow['category']);
+                        echo '<option value="' , $category , '">' , $category , '</option>';
+                    }
+                    ?>
+                </datalist>
+                <input type="hidden" name="dasis" value="insert">
+                <button type="submit">追加</button>
+            </form>
+        </div>
     </div>
+
 </body>
 </html>
 <script>
+    function openInsertModal() {
+        document.getElementById('insertModal').style.display = 'block';
+    }
+
+    function closeInsertModal() {
+        document.getElementById('insertModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('insertModal')) {
+            document.getElementById('insertModal').style.display = 'none';
+        }
+    }
+
     function openModal(id, title, artist, category) {
         document.getElementById('editForm').style.display = 'block';
         document.getElementById('editTitle').value = title;
