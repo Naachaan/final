@@ -1,57 +1,50 @@
 <?php require 'db-connect.php';
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if(isset($_POST['dasis']) && $_POST['dasis'] == 'edit'){
+    if (isset($_POST['dasis']) && $_POST['dasis'] == 'edit') {
         // データの更新処理
         $sql = $pdo->prepare('UPDATE music SET title=?, artist=?, category=? WHERE id=?');
         
         if (empty($_POST['title'])) {
             echo 'update song title';
-        } else if (empty($_POST['artist'])) {
+        } elseif (empty($_POST['artist'])) {
             echo 'update artist name';
-        }else if(empty($_POST['category'])){
-            echo 'update ganre';
-        } else if ($sql->execute([htmlspecialchars($_POST['title']), htmlspecialchars($_POST['artist']),htmlspecialchars($_POST['category']), $_POST['id']])) {
+        } elseif (empty($_POST['category'])) {
+            echo 'update genre';
+        } elseif ($sql->execute([htmlspecialchars($_POST['title']), htmlspecialchars($_POST['artist']), htmlspecialchars($_POST['category']), $_POST['id']])) {
             // 更新が成功した場合のみメッセージを表示
             echo 'Update was successful';
             unset($_POST['dasis']);
         } else {
             echo 'Update failed';
         }
-    }else if(isset($_POST['dasis']) && $_POST['dasis'] == 'insert'){
-        $sql=$pdo->prepare('insert into music(title,artist,category,image) values(?,?,?,?)');
-        if (!empty($_FILES['image']['name'])) {
-            // 画像のアップロード処理
-            $targetDir = "../image/";
-            $fileName = basename($_FILES["image"]["name"]);
-            $targetFilePath = $targetDir . $fileName;
-            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
-            
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
-                // データベースにファイル名を保存
-                $fileName = htmlspecialchars($fileName); // XSS対策
-            } else {
-                echo 'Failed to upload image';
+    } elseif (isset($_POST['dasis']) && $_POST['dasis'] == 'insert') {
+        $sql = $pdo->prepare('INSERT INTO music (title, artist, category, image) VALUES (?, ?, ?, ?)');
+        if (is_uploaded_file($_FILES['file']['tmp_name'])) {
+            if (!file_exists('image')) {
+                mkdir('image');
             }
+            $file = './image/' . basename($_FILES['file']['name']);
+            move_uploaded_file($_FILES['file']['tmp_name'], $file);
         } else {
-            $fileName = 'noimages.png';
+            $file = 'image/noimages.png';
         }
-        if(empty($_POST['title'])){
+        if (empty($_POST['title'])) {
             echo 'add song title';
-        }else if(empty($_POST['artist'])){
+        } elseif (empty($_POST['artist'])) {
             echo 'add artist name';
-        }else if(empty($_POST['category'])){
-            echo 'add ganre';
-        } else if ($sql->execute([htmlspecialchars($_POST['title']),$_POST['artist'],$_POST['category'],$fileName])) {
-            // 更新が成功した場合のみメッセージを表示
+        } elseif (empty($_POST['category'])) {
+            echo 'add genre';
+        } elseif ($sql->execute([htmlspecialchars($_POST['title']), htmlspecialchars($_POST['artist']), htmlspecialchars($_POST['category']), $file])) {
+            // 追加が成功した場合のみメッセージを表示
             echo 'Added song';
             unset($_POST['dasis']);
         } else {
             echo 'Failed to add song';
         }
     }
-} else {
 }
 ?>
 
@@ -72,41 +65,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img src="image/',$row['image'],'">';
-            echo '<p class="ctgr">',$row['category'],'</p>';
-            echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
+            echo '<img alt="image" src="', htmlspecialchars($row['image']), '">';
+            echo '<p class="ctgr">', htmlspecialchars($row['category']), '</p>';
+            echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
             echo '<div class="botton">';
-            echo '<input type="hidden" name="id" value="', $row['id'], '">';
-            echo '<button id="edit" class="edit" onclick="openModal(' . $row['id'] . ', \'' . $row['title'] . '\', \'' . $row['artist'] . '\', \'' . $row['category'] . '\')">更新</button>';
+            echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
+            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' . htmlspecialchars($row['category']) . '\')">更新</button>';
             echo '<form action="delete.php" method="post">';
-            echo '<input type="hidden" name="id" value="', $row['id'], '">';
+            echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
             echo '<button type="submit">削除</button>';
             echo '</form></div></div>';
         }
         require 'edit.php';
         ?>
     </div>
-    <form action="musiclist.php" method="post">
-        <div class="insert">
-        <label>Album image:</label>
-		<input type="file" name="image">
-        <label for="name">Title:</label>
-        <input type="text" name="title" placeholder="Enter the title of the song" required>
-        <label for="artist">   Artist:</label>
-        <input type="text" name="artist" placeholder="Enter the artist name" required>
-        <label for="category">Ganre:</label>
-        <input type="text" name="category" list="ganre" placeholder="Text input or selection" autocomplete="on" require>
-        <datalist id="ganre">
-            <?php
-            foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
-                $category = htmlspecialchars($categoryrow['category']);
-                echo '<option value="' , $category , '">' , $category , '</option>';
-            }
-            ?>
-        </datalist>
-        </div>
-        <button type="submit"><input type="hidden" name="dasis" value="insert">追加</button>
-    </form>
+    <div class="insert">
+        <form action="musiclist.php" method="post" enctype="multipart/form-data">
+            <label>Album image:</label>
+    		<input type="file" name="file">
+            <label for="name">Title:</label>
+            <input type="text" name="title" placeholder="Enter the title of the song" required><br>
+            <label for="artist">Artist:</label>
+            <input type="text" name="artist" placeholder="Enter the artist name" required><br>
+            <label for="category">Genre:</label>
+            <input type="text" name="category" list="genre" placeholder="Text input or selection" autocomplete="on" required><br>
+            <datalist id="genre">
+                <?php
+                foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
+                    $category = htmlspecialchars($categoryrow['category']);
+                    echo '<option value="' , $category , '">' , $category , '</option>';
+                }
+                ?>
+            </datalist>
+            <input type="hidden" name="dasis" value="insert">
+            <button type="submit">追加</button>
+        </form>
+    </div>
 </body>
 </html>
 <script>
