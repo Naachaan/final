@@ -69,7 +69,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
             echo '<div class="botton">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
-            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' . htmlspecialchars($row['category']) . '\')">更新</button>';
+            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' 
+            . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' 
+            . htmlspecialchars($row['category']) . '\')">更新</button>';
             echo '<form action="delete.php" method="post">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
             echo '<button type="submit">削除</button>';
