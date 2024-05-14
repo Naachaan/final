@@ -28,15 +28,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     // 削除後の楽曲リスト表示
     foreach ($pdo->query('SELECT * FROM music') as $row) {
         echo '<div class="song">';
-        echo '<img src="image/',$row['image'],'">';
-            echo '<p class="ctgr">',$row['category'],'</p>';
-            echo '<p class="title">',$row['title'],' - ',$row['artist'],'</p>';
-        echo '</div>';
+        echo '<img class="img" alt="image" src="', htmlspecialchars($row['image']), '">';
+        echo '<p class="ctgr">', htmlspecialchars($row['category']), '</p>';
+        echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
+        echo '<div class="botton">';
+        echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
+        echo '<form action="delete.php" method="post">';
+        echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
+        echo '<button type="submit">削除</button>';
+        echo '</form></div></div>';
     }
     ?> 
     </div>
     <form action="musiclist.php" method="post">
-        <button type="submit">削除画面へ戻る</button>
+        <button type="submit">トップ画面へ戻る</button>
     </form>
 </body>
 </html>

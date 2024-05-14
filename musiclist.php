@@ -57,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Playlist</title>
 </head>
 <body>
-
     <h1>Playlist</h1>
     <hr>
     <div class="music-list">
@@ -65,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 楽曲一覧表示
         foreach ($pdo->query('SELECT * FROM music') as $row) {
             echo '<div class="song">';
-            echo '<img alt="image" src="', htmlspecialchars($row['image']), '">';
+            echo '<img class="img" alt="image" src="', htmlspecialchars($row['image']), '">';
             echo '<p class="ctgr">', htmlspecialchars($row['category']), '</p>';
             echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
             echo '<div class="botton">';
@@ -82,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="insert">
         <form action="musiclist.php" method="post" enctype="multipart/form-data">
             <label>Album image:</label>
-    		<input type="file" name="file">
+    		<input type="file" name="file"><br>
             <label for="name">Title:</label>
             <input type="text" name="title" placeholder="Enter the title of the song" required><br>
             <label for="artist">Artist:</label>
