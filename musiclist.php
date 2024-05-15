@@ -4,10 +4,6 @@ require 'db-connect.php';
 // データベース接続
 $pdo = new PDO($connect, USER, PASS);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['dasis']) && $_POST['dasis'] == 'edit') {
         // データの更新処理
@@ -65,6 +61,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta http-equiv="Cache-Control" content="no-cache">
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+
     <meta charset="UTF-8">
     <title>Playlist</title>
     <style>
@@ -105,9 +105,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-
-    <h1>Playlist</h1>
-    <hr>
+    <header class="header">
+        <h1 
+        style="margin-top:0; font-size: 50px; font-family: 'Caveat', cursive; font-optical-sizing: auto; font-weight: <weight>; font-style: normal;">
+        Play List</h1>
+    </header>
     <div class="music-list">
         <?php
         // 楽曲一覧表示
@@ -129,32 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <button onclick="openInsertModal()">楽曲を追加</button>
-
-    <div id="insertModal" class="insert">
-        <div class="insert-content">
-            <span class="close" onclick="closeInsertModal()">&times;</span>
-            <form action="musiclist.php" method="post" enctype="multipart/form-data">
-                <label>Album image:</label>
-                <input type="file" name="file"><br>
-                <label for="name">Title:</label>
-                <input type="text" name="title" placeholder="Enter the title of the song" required><br>
-                <label for="artist">Artist:</label>
-                <input type="text" name="artist" placeholder="Enter the artist name" required><br>
-                <label for="category">Genre:</label>
-                <input type="text" name="category" list="genre" placeholder="Text input or selection" autocomplete="on" required><br>
-                <datalist id="genre">
-                    <?php
-                    foreach ($pdo->query('SELECT DISTINCT category FROM music') as $categoryrow) {
-                        $category = htmlspecialchars($categoryrow['category']);
-                        echo '<option value="' , $category , '">' , $category , '</option>';
-                    }
-                    ?>
-                </datalist>
-                <input type="hidden" name="dasis" value="insert">
-                <button type="submit">追加</button>
-            </form>
-        </div>
-    </div>
+    <?php require 'insert.php';?>
 
 </body>
 </html>
@@ -170,6 +147,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     window.onclick = function(event) {
         if (event.target == document.getElementById('insertModal')) {
             document.getElementById('insertModal').style.display = 'none';
+        } else if (event.target == document.getElementById('editForm')) {
+            document.getElementById('editForm').style.display = 'none';
         }
     }
 
