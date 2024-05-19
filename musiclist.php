@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
 
     <meta charset="UTF-8">
-    <title>Playlist</title>
+    <title>MusicPlaylist</title>
     <style>
         .insert {
             display: none;
@@ -108,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <header class="header">
         <h1 
         style="margin-top:0; font-size: 50px; font-family: 'Caveat', cursive; font-optical-sizing: auto; font-weight: <weight>; font-style: normal;">
-        Play List</h1>
+        Music Play List</h1>
     </header>
     <div class="music-list">
         <?php
@@ -120,17 +120,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo '<p class="title">', htmlspecialchars($row['title']), ' - ', htmlspecialchars($row['artist']), '</p>';
             echo '<div class="botton">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
-            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) . ', \'' . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) . '\', \'' . htmlspecialchars($row['category']) . '\')">更新</button>';
+            echo '<button id="edit" class="edit" onclick="openModal(' . htmlspecialchars($row['id']) 
+            . ', \'' . htmlspecialchars($row['title']) . '\', \'' . htmlspecialchars($row['artist']) 
+            . '\', \'' . htmlspecialchars($row['category']) . '\')">変更</button>';
             echo '<form action="delete.php" method="post">';
             echo '<input type="hidden" name="id" value="', htmlspecialchars($row['id']), '">';
-            echo '<button type="submit">削除</button>';
+            echo '<button type="submit" class="delete">削除</button>';
             echo '</form></div></div>';
         }
         require 'edit.php';
         ?>
+        <button class="plus" onclick="openInsertModal()">+</button>
     </div>
-
-    <button onclick="openInsertModal()">楽曲を追加</button>
     <?php require 'insert.php';?>
 
 </body>

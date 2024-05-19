@@ -1,6 +1,9 @@
 
-.body{
-    background-color: rgb(139, 209, 255);
+body{
+    /*background-color: rgb(183, 224, 252);*/
+    background: linear-gradient(-20deg, #fdb1f5 0%, #b5ecff 100%);
+    height: 100vh; /* 画面全体の高さを確保 */
+    margin: 0; /* 余白を取り除く */
 }
 .music-list{/*全体*/
     display: flex;
@@ -21,6 +24,28 @@
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+}
+.edit,.delete{
+    color: #fff;
+  border: 2px solid #fff;
+  border-radius: 0;
+  background-image: -webkit-linear-gradient(left, #b5ecff 0%, #fdb1f5 100%);
+  background-image: linear-gradient(to right, #b5ecff 0%, #fdb1f5 100%);
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .1);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .1);
+}
+.edit:hover,.delete:hover{
+    -webkit-transform: translate(0, -2px);
+  transform: translate(0, -2px);
+  color: #fff;
+  -webkit-box-shadow: 0 8px 15px rgba(0, 0, 0, .2);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, .2);
+}
+.plus{
+    font-size: 4em;
+    border: none;
+    outline: none;
+    background: transparent;
 }
 .insert{
     display: flex;
